@@ -1,6 +1,8 @@
 .env
 venv/
 reports/
-*.pyc
+*.html
 __pycache__/
-*.csv
+*.pyc
+*.egg-info/
+cloudguard_report_*.html
