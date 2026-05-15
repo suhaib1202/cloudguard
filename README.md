@@ -3,10 +3,18 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
 ![AWS](https://img.shields.io/badge/AWS-boto3-orange?style=flat-square&logo=amazon-aws)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
-![Checks](https://img.shields.io/badge/checks-20+-red?style=flat-square)
+![Checks](https://img.shields.io/badge/security_checks-20+-red?style=flat-square)
 
 > Scans AWS, Azure, and GCP against **CIS Benchmarks v3** and **NIST SP 800-53 Rev 5**.  
 > Detects misconfigurations, scores risk 0–100, and generates remediation playbooks.
+
+---
+
+## 📊 Report Dashboard
+
+![CloudGuard Dashboard](screenshot1.png)
+
+![CloudGuard Findings](screenshot2.png)
 
 ---
 
@@ -18,7 +26,7 @@
 | User has AdministratorAccess | 🔴 CRITICAL | 100 |
 | Unused IAM user | 🟡 MEDIUM | 35 |
 
-**Risk Score: 100/100 — HIGH RISK**
+**Overall Risk Score: 100/100 — HIGH RISK**
 
 ---
 
@@ -38,7 +46,7 @@
 | AWS-EC2-004 | VPC | Flow logs disabled | CIS AWS 4.1 |
 | AWS-EC2-005 | EBS | Volumes unencrypted | CIS AWS 2.2.1 |
 | AWS-CT-001 | CloudTrail | Not multi-region | CIS AWS 3.1 |
-| AZ-STG-001 | Azure Storage | HTTP allowed (no HTTPS) | CIS Azure 3.1 |
+| AZ-STG-001 | Azure Storage | HTTP allowed | CIS Azure 3.1 |
 | AZ-IAM-001 | Azure RBAC | Owner at subscription scope | CIS Azure 1.1 |
 | AZ-NET-001 | Azure NSG | SSH open from internet | CIS Azure 6.1 |
 | GCP-STG-001 | Cloud Storage | Bucket publicly accessible | CIS GCP 5.1 |
@@ -66,20 +74,22 @@ cloudguard scan              # Run full scan
 
 ## 🏗️ Architecture
 
+```
 cloudguard/
 ├── engine/
-│   ├── finding.py            # Provider-agnostic Finding dataclass
-│   ├── risk_scorer.py        # CVSS-inspired 0-100 risk scoring
-│   └── compliance_mapper.py  # CIS + NIST 800-53 control mappings
+│   ├── finding.py             # Provider-agnostic Finding dataclass
+│   ├── risk_scorer.py         # CVSS-inspired 0-100 risk scoring
+│   └── compliance_mapper.py   # CIS + NIST 800-53 control mappings
 ├── scanner/
-│   ├── aws/checks/           # S3, IAM, EC2, CloudTrail
-│   ├── azure/                # Storage, RBAC, NSG
-│   └── gcp/                  # Cloud Storage, IAM, Compute
+│   ├── aws/
+│   │   └── checks/            # S3, IAM, EC2, CloudTrail checks
+│   ├── azure/                 # Storage, RBAC, NSG checks
+│   └── gcp/                   # Cloud Storage, IAM, Compute checks
 └── reporter/
-└── html_reporter.py      # Risk-scored HTML + JSON export
+    └── html_reporter.py       # Risk-scored HTML + JSON export
+```
 
 ---
-
 
 ## 🛠️ Tech Stack
 
@@ -89,7 +99,10 @@ cloudguard/
 
 ## 💡 Why This Matters
 
-Cloud misconfiguration is the **#1 cause of breaches** — not exploits.
-- Capital One breach → overprivileged IAM role  
-- Toyota data leak → public GCS bucket  
-- Microsoft Power Apps → misconfigured storage (38M records exposed)
+Cloud misconfiguration is the **#1 cause of data breaches** — not exploits.
+
+- **Capital One** breach → overprivileged IAM role
+- **Toyota** data leak → public GCS bucket
+- **Microsoft Power Apps** → misconfigured storage (38M records exposed)
+
+CloudGuard automates the exact checks Big 4 security consultants run manually.
