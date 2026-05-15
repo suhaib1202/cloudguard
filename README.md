@@ -104,5 +104,3 @@ Cloud misconfiguration is the **#1 cause of data breaches** — not exploits.
 - **Capital One** breach → overprivileged IAM role
 - **Toyota** data leak → public GCS bucket
 - **Microsoft Power Apps** → misconfigured storage (38M records exposed)
-
-CloudGuard automates the exact checks Big 4 security consultants run manually.
