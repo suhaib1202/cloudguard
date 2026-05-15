@@ -1,0 +1,57 @@
+
+    <html>
+    <head>
+        <title>CloudGuard Report</title>
+        <style>
+            body { font-family: Arial; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ddd; padding: 8px; }
+            th { background-color: #333; color: white; }
+        </style>
+    </head>
+    <body>
+
+        <h1>CloudGuard Security Report</h1>
+        <h2>Company: Demo Corp</h2>
+
+        <h3>Risk Score: 80/100</h3>
+
+        <p>
+        Critical: 2 |
+        High: 0 |
+        Medium: 0 |
+        Total: 2
+        </p>
+
+        <table>
+            <tr>
+                <th>Check ID</th>
+                <th>Severity</th>
+                <th>Provider</th>
+                <th>Title</th>
+                <th>Risk</th>
+            </tr>
+
+            
+        <tr>
+            <td>AWS-S3-REAL-002</td>
+            <td>CRITICAL</td>
+            <td>AWS</td>
+            <td>Public S3 bucket (Policy)</td>
+            <td>95</td>
+        </tr>
+        
+        <tr>
+            <td>AWS-IAM-002</td>
+            <td>CRITICAL</td>
+            <td>AWS</td>
+            <td>User has AdministratorAccess</td>
+            <td>100</td>
+        </tr>
+        
+
+        </table>
+
+    </body>
+    </html>
+    

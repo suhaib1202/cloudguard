@@ -1,0 +1,81 @@
+
+    <html>
+    <head>
+        <title>CloudGuard Report</title>
+        <style>
+            body { font-family: Arial; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ddd; padding: 8px; }
+            th { background-color: #333; color: white; }
+        </style>
+    </head>
+    <body>
+
+        <h1>CloudGuard Security Report</h1>
+        <h2>Company: Demo Corp</h2>
+
+        <h3>Risk Score: 100/100</h3>
+
+        <p>
+        Critical: 2 |
+        High: 2 |
+        Medium: 1 |
+        Total: 5
+        </p>
+
+        <table>
+            <tr>
+                <th>Check ID</th>
+                <th>Severity</th>
+                <th>Provider</th>
+                <th>Title</th>
+                <th>Risk</th>
+            </tr>
+
+            
+        <tr>
+            <td>AWS-S3-001</td>
+            <td>CRITICAL</td>
+            <td>AWS</td>
+            <td>Public S3 bucket</td>
+            <td>80</td>
+        </tr>
+        
+        <tr>
+            <td>AWS-IAM-001</td>
+            <td>CRITICAL</td>
+            <td>AWS</td>
+            <td>Root access key active</td>
+            <td>80</td>
+        </tr>
+        
+        <tr>
+            <td>AWS-EC2-001</td>
+            <td>HIGH</td>
+            <td>AWS</td>
+            <td>SSH open to world</td>
+            <td>70</td>
+        </tr>
+        
+        <tr>
+            <td>AWS-EC2-002</td>
+            <td>HIGH</td>
+            <td>AWS</td>
+            <td>RDP open to world</td>
+            <td>70</td>
+        </tr>
+        
+        <tr>
+            <td>AWS-S3-002</td>
+            <td>MEDIUM</td>
+            <td>AWS</td>
+            <td>S3 not encrypted</td>
+            <td>20</td>
+        </tr>
+        
+
+        </table>
+
+    </body>
+    </html>
+    

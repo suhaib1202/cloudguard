@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudGuard Security Report — {{ scan_meta.company }}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+  :root {
+    --bg:#0a0c10;--bg-card:#111520;--bg-card2:#161b27;--border:#1e2535;--border2:#252d40;
+    --text:#c8d0e0;--text-dim:#6b7a99;--text-bright:#e8edf5;--accent:#4f9cf9;
+    --critical:#ff2d55;--high:#ff6b35;--medium:#ffd60a;--low:#30d158;--info:#636366;
+    --pass:#30d158;--fail:#ff2d55;--warn:#ffd60a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.6;}
+  .header{background:linear-gradient(135deg,#0d1117 0%,#111829 50%,#0d1117 100%);border-bottom:1px solid var(--border);padding:40px 60px;position:relative;overflow:hidden;}
+  .header::before{content:'';position:absolute;top:-50%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(79,156,249,0.06) 0%,transparent 70%);pointer-events:none;}
+  .header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;}
+  .logo{display:flex;align-items:center;gap:14px;}
+  .logo-icon{width:48px;height:48px;background:linear-gradient(135deg,#4f9cf9,#7b5ea7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(79,156,249,0.3);}
+  .logo-text{font-size:22px;font-weight:700;color:var(--text-bright);letter-spacing:-0.5px;}
+  .logo-sub{font-size:12px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+  .header-meta{text-align:right;font-family:'IBM Plex Mono',monospace;}
+  .header-meta .date{font-size:12px;color:var(--text-dim);}
+  .header-meta .company{font-size:18px;font-weight:600;color:var(--text-bright);margin-top:4px;}
+  .header-title{font-size:32px;font-weight:700;color:var(--text-bright);letter-spacing:-1px;}
+  .header-sub{font-size:15px;color:var(--text-dim);margin-top:6px;}
+  .risk-banner{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px 48px;margin:32px 60px;display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr;gap:32px;align-items:center;}
+  .risk-score-wrap{text-align:center;}
+  .risk-score-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;}
+  .risk-score-num{font-size:64px;font-weight:700;font-family:'IBM Plex Mono',monospace;line-height:1;margin-top:4px;}
+  .risk-score-num.critical{color:var(--critical);}
+  .risk-score-num.high{color:var(--high);}
+  .risk-score-num.medium{color:var(--medium);}
+  .risk-score-num.low{color:var(--low);}
+  .stat-box{text-align:center;border-left:1px solid var(--border);padding-left:32px;}
+  .stat-num{font-size:36px;font-weight:700;font-family:'IBM Plex Mono',monospace;}
+  .stat-lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-top:4px;}
+  .stat-num.critical{color:var(--critical);}
+  .stat-num.high{color:var(--high);}
+  .stat-num.medium{color:var(--medium);}
+  .stat-num.low{color:var(--low);}
+  .stat-num.pass{color:var(--pass);}
+  .content{padding:0 60px 60px;}
+  .section-title{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;margin:40px 0 16px;display:flex;align-items:center;gap:12px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+  .provider-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:8px;}
+  .provider-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;}
+  .provider-name{font-size:13px;font-weight:600;color:var(--text-bright);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .provider-dot{width:8px;height:8px;border-radius:50%;}
+  .aws-dot{background:#ff9900;}.azure-dot{background:#0078d4;}.gcp-dot{background:#4285f4;}
+  .provider-stats{display:flex;gap:16px;}
+  .p-stat{text-align:center;}
+  .p-stat-num{font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace;}
+  .p-stat-lbl{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+  .badge-CRITICAL{background:rgba(255,45,85,0.15);color:var(--critical);border:1px solid rgba(255,45,85,0.3);}
+  .badge-HIGH{background:rgba(255,107,53,0.15);color:var(--high);border:1px solid rgba(255,107,53,0.3);}
+  .badge-MEDIUM{background:rgba(255,214,10,0.12);color:var(--medium);border:1px solid rgba(255,214,10,0.3);}
+  .badge-LOW{background:rgba(48,209,88,0.1);color:var(--low);border:1px solid rgba(48,209,88,0.2);}
+  .badge-FAIL{background:rgba(255,45,85,0.12);color:var(--fail);border:1px solid rgba(255,45,85,0.25);}
+  .badge-PASS{background:rgba(48,209,88,0.1);color:var(--pass);border:1px solid rgba(48,209,88,0.2);}
+  .badge-WARN{background:rgba(255,214,10,0.1);color:var(--warn);border:1px solid rgba(255,214,10,0.25);}
+  .check-id{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);white-space:nowrap;}
+  .risk-bar-wrap{display:flex;align-items:center;gap:8px;}
+  .risk-bar-track{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .risk-bar-fill{height:100%;border-radius:2px;}
+  .risk-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);}
+  .finding-detail{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+  .finding-header{padding:16px 20px;display:flex;align-items:flex-start;gap:14px;cursor:pointer;user-select:none;}
+  .finding-header:hover{background:rgba(255,255,255,0.01);}
+  .finding-chevron{margin-left:auto;color:var(--text-dim);font-size:12px;transition:transform 0.2s;flex-shrink:0;margin-top:2px;}
+  .finding-detail.open .finding-chevron{transform:rotate(90deg);}
+  .finding-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border);}
+  .finding-detail.open .finding-body{display:block;}
+  .finding-title{font-size:14px;font-weight:500;color:var(--text-bright);line-height:1.4;}
+  .finding-meta{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap;}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
+  .detail-section-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;}
+  .detail-text{font-size:13px;color:var(--text);line-height:1.6;}
+  .detail-code{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);white-space:pre-wrap;word-break:break-all;line-height:1.5;}
+  .control-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .control-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(79,156,249,0.08);border:1px solid rgba(79,156,249,0.2);color:var(--accent);padding:2px 8px;border-radius:4px;}
+  .filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+  .filter-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);font-size:12px;font-family:'IBM Plex Mono',monospace;cursor:pointer;transition:all 0.15s;}
+  .filter-btn:hover,.filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(79,156,249,0.08);}
+  .search-input{flex:1;min-width:200px;padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:13px;outline:none;}
+  .search-input:focus{border-color:var(--accent);}
+  .findings-table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .findings-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .findings-table thead th{background:var(--bg-card2);padding:12px 16px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-weight:500;border-bottom:1px solid var(--border);}
+  .findings-table tbody tr{border-bottom:1px solid var(--border);}
+  .findings-table tbody tr:last-child{border-bottom:none;}
+  .findings-table tbody tr:hover{background:rgba(255,255,255,0.02);}
+  .findings-table tbody td{padding:12px 16px;vertical-align:top;}
+  .resource-id{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .footer{border-top:1px solid var(--border);padding:20px 60px;display:flex;justify-content:space-between;align-items:center;color:var(--text-dim);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">🛡</div>
+      <div>
+        <div class="logo-text">CloudGuard</div>
+        <div class="logo-sub">Multi-Cloud Security Auditor v1.0</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div class="date">{{ scan_meta.timestamp }}</div>
+      <div class="company">{{ scan_meta.company }}</div>
+    </div>
+  </div>
+  <div class="header-title">Security Assessment Report</div>
+  <div class="header-sub">Scanned against CIS Benchmarks &amp; NIST SP 800-53 Rev 5 &nbsp;·&nbsp; Providers: {{ scan_meta.providers|join(', ') }} &nbsp;·&nbsp; {{ summary.total_checks }} checks executed</div>
+</div>
+
+<div class="risk-banner">
+  <div class="risk-score-wrap">
+    <div class="risk-score-label">Overall Risk Score</div>
+    <div class="risk-score-num {% if summary.overall_score >= 70 %}critical{% elif summary.overall_score >= 40 %}high{% elif summary.overall_score >= 20 %}medium{% else %}low{% endif %}">{{ summary.overall_score|int }}</div>
+    <div class="risk-score-label" style="margin-top:4px">/ 100</div>
+  </div>
+  <div class="stat-box"><div class="stat-num critical">{{ summary.critical_count }}</div><div class="stat-lbl">Critical</div></div>
+  <div class="stat-box"><div class="stat-num high">{{ summary.high_count }}</div><div class="stat-lbl">High</div></div>
+  <div class="stat-box"><div class="stat-num medium">{{ summary.medium_count }}</div><div class="stat-lbl">Medium</div></div>
+  <div class="stat-box"><div class="stat-num low">{{ summary.low_count }}</div><div class="stat-lbl">Low</div></div>
+  <div class="stat-box"><div class="stat-num pass">{{ summary.pass_count }}</div><div class="stat-lbl">Passed</div></div>
+</div>
+
+<div class="content">
+  <div class="section-title">Provider Breakdown</div>
+  <div class="provider-grid">
+    {% for provider, stats in provider_summary.items() %}
+    <div class="provider-card">
+      <div class="provider-name"><div class="provider-dot {{ provider|lower }}-dot"></div>{{ provider }}</div>
+      <div class="provider-stats">
+        <div class="p-stat"><div class="p-stat-num" style="color:var(--critical)">{{ stats.critical }}</div><div class="p-stat-lbl">Critical</div></div>
+        <div class="p-stat"><div class="p-stat-num" style="color:var(--high)">{{ stats.high }}</div><div class="p-stat-lbl">High</div></div>
+        <div class="p-stat"><div class="p-stat-num" style="color:var(--medium)">{{ stats.medium }}</div><div class="p-stat-lbl">Medium</div></div>
+        <div class="p-stat"><div class="p-stat-num" style="color:var(--pass)">{{ stats.passed }}</div><div class="p-stat-lbl">Passed</div></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="section-title">Failed Findings ({{ failed_findings|length }})</div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterSeverity('ALL',this)">All</button>
+    <button class="filter-btn" onclick="filterSeverity('CRITICAL',this)">Critical</button>
+    <button class="filter-btn" onclick="filterSeverity('HIGH',this)">High</button>
+    <button class="filter-btn" onclick="filterSeverity('MEDIUM',this)">Medium</button>
+    <button class="filter-btn" onclick="filterSeverity('LOW',this)">Low</button>
+    <input class="search-input" type="text" placeholder="Search findings…" oninput="searchFindings(this.value)">
+  </div>
+
+  <div id="findings-container">
+    {% for f in failed_findings %}
+    <div class="finding-detail" data-severity="{{ f.severity }}" data-provider="{{ f.provider }}" data-title="{{ f.title|lower }}" data-check="{{ f.check_id|lower }}">
+      <div class="finding-header" onclick="toggleFinding(this)">
+        <div>
+          <div class="finding-title">{{ f.title }}</div>
+          <div class="finding-meta">
+            <span class="badge badge-{{ f.severity }}">{{ f.severity }}</span>
+            <span class="badge badge-{{ f.status }}">{{ f.status }}</span>
+            <span class="check-id">{{ f.check_id }}</span>
+            <span style="color:var(--text-dim);font-size:12px;">{{ f.provider }} · {{ f.service }} · {{ f.region }}</span>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:16px;flex-shrink:0;">
+          <div class="risk-bar-wrap">
+            <div class="risk-bar-track">
+              <div class="risk-bar-fill" style="width:{{ f.risk_score }}%;background:{% if f.risk_score >= 70 %}var(--critical){% elif f.risk_score >= 40 %}var(--high){% elif f.risk_score >= 20 %}var(--medium){% else %}var(--low){% endif %};"></div>
+            </div>
+            <div class="risk-num">{{ f.risk_score }}</div>
+          </div>
+          <div class="finding-chevron">▶</div>
+        </div>
+      </div>
+      <div class="finding-body">
+        <div class="detail-grid">
+          <div><div class="detail-section-title">Description</div><div class="detail-text">{{ f.description }}</div></div>
+          <div><div class="detail-section-title">Remediation</div><div class="detail-code">{{ f.remediation }}</div></div>
+        </div>
+        <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+          <div><div class="detail-section-title">Resource</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);word-break:break-all;">{{ f.resource_id }}</div></div>
+          {% if f.cis_controls %}<div><div class="detail-section-title">CIS Controls</div><div class="control-tags">{% for c in f.cis_controls %}<span class="control-tag">{{ c }}</span>{% endfor %}</div></div>{% endif %}
+          {% if f.nist_controls %}<div><div class="detail-section-title">NIST 800-53</div><div class="control-tags">{% for c in f.nist_controls %}<span class="control-tag">{{ c }}</span>{% endfor %}</div></div>{% endif %}
+        </div>
+        {% if f.evidence %}
+        <div style="margin-top:16px;"><div class="detail-section-title">Evidence</div><div class="detail-code">{{ f.evidence | tojson(indent=2) }}</div></div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if passed_findings %}
+  <div class="section-title" style="margin-top:40px">Passed Checks ({{ passed_findings|length }})</div>
+  <div class="findings-table-wrap">
+    <table class="findings-table">
+      <thead><tr><th>Check ID</th><th>Title</th><th>Provider</th><th>Service</th><th>Resource</th><th>Severity</th></tr></thead>
+      <tbody>
+        {% for f in passed_findings %}
+        <tr>
+          <td><span class="check-id">{{ f.check_id }}</span></td>
+          <td style="color:var(--text-bright);max-width:320px;">{{ f.title }}</td>
+          <td><span style="font-size:12px;color:var(--text-dim);">{{ f.provider }}</span></td>
+          <td><span style="font-size:12px;color:var(--text-dim);">{{ f.service }}</span></td>
+          <td><span class="resource-id" title="{{ f.resource_id }}">{{ f.resource_name }}</span></td>
+          <td><span class="badge badge-{{ f.severity }}">{{ f.severity }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="footer">
+  <div>Generated by CloudGuard v1.0 &nbsp;·&nbsp; {{ scan_meta.timestamp }}</div>
+  <div>{{ summary.total_checks }} checks &nbsp;·&nbsp; {{ failed_findings|length }} failures &nbsp;·&nbsp; {{ passed_findings|length }} passed</div>
+</div>
+
+<script>
+  function toggleFinding(header){header.closest('.finding-detail').classList.toggle('open');}
+  let activeSeverity='ALL',activeSearch='';
+  function applyFilters(){
+    document.querySelectorAll('#findings-container .finding-detail').forEach(el=>{
+      const sevOk=activeSeverity==='ALL'||el.dataset.severity===activeSeverity;
+      const combined=el.dataset.title+' '+el.dataset.check;
+      const srchOk=!activeSearch||combined.includes(activeSearch.toLowerCase());
+      el.style.display=(sevOk&&srchOk)?'block':'none';
+    });
+  }
+  function filterSeverity(sev,btn){
+    activeSeverity=sev;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+  function searchFindings(val){activeSearch=val;applyFilters();}
+  document.querySelectorAll('[data-severity="CRITICAL"]').forEach(el=>el.classList.add('open'));
+</script>
+</body>
+</html>

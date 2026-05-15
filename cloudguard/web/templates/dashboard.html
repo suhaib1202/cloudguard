@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CloudGuard Dashboard</title>
+    <style>
+        body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+        h1 { color: #333; }
+        .card { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; }
+        th { background: #333; color: white; }
+    </style>
+</head>
+<body>
+
+<h1>🚀 CloudGuard Dashboard</h1>
+
+<div class="card">
+    <h2>Risk Score: {{ summary.overall_score }}/100</h2>
+    <p>Critical: {{ summary.critical_count }} | High: {{ summary.high_count }}</p>
+</div>
+
+<div class="card">
+    <h2>Findings</h2>
+    <table>
+        <tr>
+            <th>ID</th><th>Severity</th><th>Service</th><th>Title</th><th>Risk</th>
+        </tr>
+        {% for f in findings %}
+        <tr>
+            <td>{{ f.check_id }}</td>
+            <td>{{ f.severity.name }}</td>
+            <td>{{ f.service }}</td>
+            <td>{{ f.title }}</td>
+            <td>{{ f.risk_score }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+</body>
+</html>
